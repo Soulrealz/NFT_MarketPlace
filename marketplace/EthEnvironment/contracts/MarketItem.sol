@@ -9,17 +9,17 @@ contract NFTItem is ERC721URIStorage
     using Counters for Counters.Counter;
     Counters.Counter private __tokenIds;
 
-    event CreatedNFT(uint256 tokenID);
+    event CreatedNFT(uint tokenID, address owner, string tokenURI);
 
     constructor() ERC721("Blank NFTs", "BNFT") {}
 
     function createNFT(string calldata tokenURI) public
     {
         __tokenIds.increment();
-        uint256 currentID = __tokenIds.current();
+        uint currentID = __tokenIds.current();
         _safeMint(msg.sender, currentID);
         _setTokenURI(currentID, tokenURI);
 
-        emit CreatedNFT(currentID);
+        emit CreatedNFT(currentID, msg.sender, tokenURI);
     }
 }
