@@ -1,6 +1,7 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
 import { Contract } from "hardhat/internal/hardhat-network/stack-traces/model";
+import { NFTItem, NFTItem__factory } from "../typechain-types";
 
 
 describe ("NFTMarket", () => {
@@ -47,6 +48,7 @@ describe ("NFTMarket", () => {
     it("should revert if price is zero", async () => {
       const tokenURI = 'https://some.uri/'; 
       const tokenID = await createNFT(tokenURI);
+      let item: NFTItem = NFTItem__factory.
       const transaction = nftMarket.listNFT(tokenID, 0);
       await expect (transaction).to.be.revertedWithCustomError(nftMarket, "InvalidPrice");
     })

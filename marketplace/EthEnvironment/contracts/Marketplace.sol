@@ -28,7 +28,7 @@ contract NFTMarket is Ownable
 
     function listNFT(uint tokenID, uint price, NFTItem item) external 
     {
-        if (price < 0)
+        if (price <= 0)
         {
             revert InvalidPrice();
         }
