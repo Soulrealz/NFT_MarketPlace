@@ -4,6 +4,7 @@ pragma solidity 0.8.17;
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "./MarketItem.sol";
 
+import "../../node_modules/hardhat/console.sol";
 struct NFTListing 
 {
     uint256 price;
@@ -32,14 +33,12 @@ contract NFTMarket is Ownable
         {
             revert InvalidPrice();
         }
-
-        item.approve(address(this), tokenID);
         item.transferFrom(msg.sender, address(this), tokenID);
         __listings[tokenID] = NFTListing(price, msg.sender, item);
         emit NFTListed(tokenID, price);
     }
 
-    function buyNFT(uint tokenID) external payable
+    function buyNFT(uint tokenID, NFTItem item) external payable
     {
         NFTListing memory listing = __listings[tokenID];
         if (listing.price == 0) 
@@ -50,12 +49,15 @@ contract NFTMarket is Ownable
         {
             revert InvalidPrice();
         }
-
-        listing.item.transferFrom(address(this), msg.sender, tokenID);
+        item.transferFrom(address(this), msg.sender, tokenID);
         payable(listing.seller).transfer(listing.price * 98 / 100);
+        console.log("value - ", msg.value);
+        console.log("transfer - ", listing.price * 98 / 100);
+        console.log("balance - ", address(this).balance);
         removeNFTFromListing(tokenID);
-
+        
         emit NFTBought(tokenID, msg.sender);
+        console.log("555");
     }
 
     function cancelListing(uint tokenID) external
