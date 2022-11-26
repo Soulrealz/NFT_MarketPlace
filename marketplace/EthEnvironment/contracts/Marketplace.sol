@@ -21,9 +21,9 @@ contract NFTMarket is Ownable
     error NotTheOwner();
     error ZeroBalance();
 
-    event NFTListed(uint tokenID, uint price);
-    event NFTBought(uint tokenID, address newOwner);
-    event NFTListingCancelled();
+    event NFTListed(uint tokenID, uint price, address from, address to);
+    event NFTBought(uint tokenID, address from, address newOwner);
+    event NFTListingCancelled(address from, address to);
 
     constructor() {}
 
@@ -35,7 +35,7 @@ contract NFTMarket is Ownable
         }
         item.transferFrom(msg.sender, address(this), tokenID);
         __listings[tokenID] = NFTListing(price, msg.sender, item);
-        emit NFTListed(tokenID, price);
+        emit NFTListed(tokenID, price, msg.sender, address(this));
     }
 
     function buyNFT(uint tokenID, NFTItem item) external payable
@@ -56,7 +56,7 @@ contract NFTMarket is Ownable
         console.log("balance - ", address(this).balance);
         removeNFTFromListing(tokenID);
         
-        emit NFTBought(tokenID, msg.sender);
+        emit NFTBought(tokenID, address(this), msg.sender);
         console.log("555");
     }
 
@@ -75,7 +75,7 @@ contract NFTMarket is Ownable
         listing.item.transferFrom(address(this), msg.sender, tokenID);
         removeNFTFromListing(tokenID);
 
-        emit NFTListingCancelled();
+        emit NFTListingCancelled(address(this), msg.sender);
     }
 
     function removeNFTFromListing(uint tokenID) private 
