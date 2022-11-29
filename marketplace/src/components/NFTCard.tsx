@@ -97,7 +97,7 @@ const NFTCard = (props: NFTCardProps) => {
         onClick={onButtonClick}
         disabled={loading}
       >
-        {loading && "Busy..."}
+        {loading && "Processing"}
         {!loading && (
           <>
             {!forSale && "SELL"}

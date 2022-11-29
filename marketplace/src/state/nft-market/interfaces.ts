@@ -6,3 +6,4 @@ export type NFT = {
   price: string;
   tokenURI: string;
 };
+//TODO add more exports

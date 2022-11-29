@@ -10,6 +10,7 @@ const NFT_ITEM_ADDRESS = process.env.NEXT_PUBLIC_NFT_ITEM_ADDRESS as string;
 
 const useNFTMarket = () => {
     const {signer} = useSigner();
+    //TODO: Fix addresses
     const nftMarket = new Contract(NFT_MARKET_ADDRESS, NFT_MARKET.abi, signer)
     const nftItem = new Contract(NFT_ITEM_ADDRESS, NFT_ITEM.abi, signer)
 
@@ -25,7 +26,7 @@ const useNFTMarket = () => {
                 const json = await response.json();
                 const transaction: TransactionResponse = await nftItem.createNFT(json.uri);
                 await transaction.wait();
-            }            
+            }           
         } 
         catch (exception) {
             console.log(exception);

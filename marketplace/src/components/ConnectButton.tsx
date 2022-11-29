@@ -11,7 +11,7 @@ const ConnectButton = () => {
       onClick={connectWallet}
       disabled={loading}
     >
-      {loading ? "busy..." : "Connect wallet"}
+      {loading ? "Processing" : "Connect wallet"}
     </button>
   );
 };
