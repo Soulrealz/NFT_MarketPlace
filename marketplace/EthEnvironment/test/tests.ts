@@ -1,7 +1,8 @@
 import { expect } from "chai";
+import { BigNumber } from "ethers";
 import { ethers } from "hardhat";
 import { Contract } from "hardhat/internal/hardhat-network/stack-traces/model";
-const BigNumber = require('bignumber.js');
+//const BigNumber = require('bignumber.js');
 
 //TODO check event params
 describe ("NFTMarket", () => {
@@ -27,24 +28,7 @@ describe ("NFTMarket", () => {
     return tokenID;
   }
 
-  // describe("tester", function() {
-  //   it("idk", async () => {
-  //     const transaction = await nftItem.createNFT('https://some.uri/');
-  //     const receipt = await transaction.wait();
-  //     //console.log("Addr1: ", await (await ethers.getSigners())[0].getAddress(), "\n",);
-  //     //console.log("Ev0: from to tokenId\n", receipt.events[0].args.from, "\n", receipt.events[0].args.to, "\n", receipt.events[0].args.tokenId);
-  //     //console.log("\n\nEv1: owner tokenURI tokenId\n", receipt.events[1].args.owner, "\n", receipt.events[1].args.tokenURI, "\n", receipt.events[1].args.tokenID);
-  //     const tokenID = receipt.events[0].args.tokenId;
-
-  //     //console.log("\n\nNFTItem Address: ", nftItem.address, "\nNFTMarket Address: ", nftMarket.address, "\n");
-  //     await nftItem.approve(nftMarket.address, tokenID);
-  //     const tr2 = await nftMarket.listNFT(tokenID, 13, nftItem.address);
-  //     const rc2 = await tr2.wait();
-
-  //   })
-  // })
-
-  describe("MarketItem", function () {
+  describe("CreateNFT", function () {
   
     it("should create nft", async () => {  
       const tokenURI = 'https://some.uri/';    
@@ -94,46 +78,20 @@ describe ("NFTMarket", () => {
       const tokenID = await createNFT(tokenURI);
       await nftItem.approve(nftMarket.address, tokenID);
       await nftMarket.listNFT(tokenID, 13, nftItem.address);
-      await expect(nftMarket.buyNFT(tokenID, nftItem.address, {value: 12})).to.be.revertedWithCustomError(nftMarket, "InvalidPrice");
+      await expect(nftMarket.buyNFT(tokenID, nftItem.address, {value: 12})).to.be.revertedWithCustomError(nftMarket, "InsufficientFunds");
     })
 
-    // it("should buy nft successfully", async () => {
-    //   const tokenID = await createNFT(tokenURI);
+    it("should buy nft successfully", async () => {
+      const tokenID = await createNFT(tokenURI);
 
-    //   const [addr1, addr2] = await ethers.getSigners();
-    //   const sellerBalance = await addr1.getBalance();
-    //   const price = 12345;
-    //   await nftItem.approve(nftMarket.address, tokenID);
-    //   await nftMarket.listNFT(tokenID, price, nftItem.address);
-    //   await new Promise(r => setTimeout(r, 100));
-
-    //   const MIDBALANCE = await addr1.getBalance();
-    //   console.log("MIDBAL: ", ethers.utils.formatEther(MIDBALANCE), "\n");      
+      const [addr1, addr2] = await ethers.getSigners();
+      const price = 12345;
+      await nftItem.approve(nftMarket.address, tokenID);
+      await nftMarket.listNFT(tokenID, price, nftItem.address);
+      await new Promise(r => setTimeout(r, 100));
       
-    //   await nftMarket.connect(addr2).buyNFT(tokenID, nftItem.address, {value: price});
-    //   await new Promise(r => setTimeout(r, 100));
-    //   const newSellerBalance = await addr1.getBalance();
-    //   console.log("Balance of seller: ", ethers.utils.formatEther(sellerBalance), "\n");
-    //   console.log("Balance of seller: ", ethers.utils.formatEther(newSellerBalance), "\n");
-    //   console.log("wat da: ", ethers.utils.formatEther(MIDBALANCE));
-    //   console.log("fak? ", ethers.utils.formatEther(newSellerBalance));
-    //   console.log("--------------------------------");
-    //   const numb = "5" - "3";
-    //   console.log(numb);
-    //   console.log("--------------------------------");
-    //   const diff = ethers.utils.formatEther(MIDBALANCE) - ethers.utils.formatEther(newSellerBalance);
-    //   console.log("Diff: ", diff);
-    //   const profit = Math.floor((price * 98) / 100);
-    //   console.log("Profit: ", profit);
-    //   const fee = price - profit;
-
-    //   console.log("old: ", ethers.utils.formatEther(sellerBalance))
-    //   console.log("mid: ", ethers.utils.formatEther(MIDBALANCE))
-    //   console.log("new: ", ethers.utils.formatEther(newSellerBalance))
-    //   console.log("profit: ", profit)
-    //   expect(diff).to.equal(profit);
-    //   //ADD CHECK FOR CONTRACT BALANCE DO NOT ASSUME ITS 0
-    // })
+      await expect(nftMarket.connect(addr2).buyNFT(tokenID, nftItem.address, {value: price})).to.emit(nftMarket, "NFTBought");
+    })
   })
 
   describe("cancelListing", () => {
@@ -165,9 +123,47 @@ describe ("NFTMarket", () => {
 
   describe("withdrawFunds", () => {
     const tokenURI = 'https://some.uri/';
-    it("should revert if not owner", async () => {
-      const [addr1, addr2] = await ethers.getSigners()
-      await expect(nftMarket.connect(addr2).withdrawFunds()).to.be.revertedWith("Ownable: caller is not the owner")
+    // it("should revert if zero balance", async () => {
+    //   const [addr1, addr2] = await ethers.getSigners()
+    //   await expect(nftMarket.connect(addr2).userWithdrawMoney()).to.be.revertedWithCustomError(nftMarket, "ZeroBalance");
+    // })
+
+    it("should withdraw only certain address' eth", async () => {
+      const [addr1, addr2, addr3] = await ethers.getSigners()
+      await expect(nftMarket.connect(addr2).userWithdrawMoney()).to.be.revertedWithCustomError(nftMarket, "ZeroBalance")
+      await expect(nftMarket.connect(addr3).userWithdrawMoney()).to.be.revertedWithCustomError(nftMarket, "ZeroBalance")
+      //Clear Contract
+      await nftMarket.userWithdrawMoney();
+      //console.log("Beginning:\nAddr1: ", await addr1.getBalance(), "\nAddr2", await addr2.getBalance(), "\nAddr3", await addr3.getBalance());
+      
+      //List and Buy
+      const transaction = await nftItem.connect(addr3).createNFT(tokenURI);
+      const receipt = await transaction.wait();
+      const tokenID = receipt.events[0].args.tokenId;
+
+      const price = 66666;
+      await nftItem.connect(addr3).approve(nftMarket.address, tokenID);
+      await nftMarket.connect(addr3).listNFT(tokenID, price, nftItem.address);
+      await new Promise(r => setTimeout(r, 100));
+
+      await nftMarket.connect(addr2).buyNFT(tokenID, nftItem.address, {value: price})
+      
+      //console.log("Post Buy:\nAddr1: ", await addr1.getBalance(), "\nAddr2", await addr2.getBalance(), "\nAddr3", await addr3.getBalance());
+
+      const oldBal = await addr3.getBalance();
+      const withdrawTransact = await nftMarket.connect(addr3).userWithdrawMoney();
+      const withdrawReceipt = await transaction.wait();
+      const gas = receipt.gasUsed * receipt.effectiveGasPrice;
+      //const newBal = (await addr3.getBalance()).add(gas);
+
+      console.log("TESTTESTTESTTESTTESTTEST");
+      console.log(oldBal);
+      console.log(gas);
+      console.log(oldBal.sub(gas));
+      console.log(price);
+      console.log(await addr3.getBalance());
+      expect(oldBal.sub(gas).add(price)).to.eq(await addr3.getBalance());
+      //console.log(oldBal.sub(gas).add(price).eq(await addr3.getBalance()));
     })
 
     // it("should transfer funds to deployer", async() => {
@@ -177,7 +173,7 @@ describe ("NFTMarket", () => {
 
     //   const [addr1, addr2] = await ethers.getSigners()
     //   const initialOwnerBal = await addr1.getBalance();
-    //   const transaction = await nftMarket.withdrawFunds();
+    //   const transaction = await nftMarket.userWithdrawMoney();
     //   const receipt = await transaction.wait();
 
       
@@ -188,9 +184,12 @@ describe ("NFTMarket", () => {
     //   //expect(transferred).to.equal(contractBal);
     // })
 
-    it("should revert if contract has zero ether", async () => {
-        await expect(nftMarket.withdrawFunds()).to.be.revertedWithCustomError(nftMarket, "ZeroBalance");
-    })
+    // it("should revert if contract has zero ether", async () => {
+    //   //const [addr1, addr2] = await ethers.getSigners();
+    //   await nftMarket.userWithdrawMoney();
+    //   //await nftMarket.userWithdrawMoney();
+    //   //await expect(nftMarket.userWithdrawMoney()).to.be.revertedWithCustomError(nftMarket, "ZeroBalance");
+    // })
   })
 })
 
