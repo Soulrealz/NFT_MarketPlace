@@ -4,9 +4,6 @@ pragma solidity 0.8.17;
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "./MarketItem.sol";
 
-import "../../node_modules/hardhat/console.sol";
-
-
 contract NFTMarket is Ownable
 {   
     struct NFTListing 
@@ -17,6 +14,7 @@ contract NFTMarket is Ownable
         bool isForSale;
     }
 
+    bool internal locked;
     mapping(uint256 => NFTListing) private __listings;
     mapping(address => uint) private __userFunds;
 
@@ -26,10 +24,21 @@ contract NFTMarket is Ownable
     error NotTheOwner();
     error ZeroBalance();
     error FailedToSendEther();
+    error NoReEntry();
 
     event NFTListed(uint tokenID, uint price, address from, address to);
     event NFTBought(uint tokenID, address from, address newOwner);
-    event NFTListingCancelled(address from, address to);
+    event NFTListingCancelled(uint tokenID, address from, address to);
+
+    modifier noReentrant() {
+        if (locked)
+        {
+            revert NoReEntry();
+        }
+        locked = true;
+        _;
+        locked = false;
+    }
 
     constructor() {}
 
@@ -78,7 +87,7 @@ contract NFTMarket is Ownable
         listing.item.transferFrom(address(this), msg.sender, tokenID);
         removeNFTFromListing(tokenID);
 
-        emit NFTListingCancelled(address(this), msg.sender);
+        emit NFTListingCancelled(tokenID, address(this), msg.sender);
     }
 
     function removeNFTFromListing(uint tokenID) private 
@@ -86,29 +95,9 @@ contract NFTMarket is Ownable
         delete __listings[tokenID];
     }
 
-    // function withdrawFunds() external onlyOwner
-    // {
-    //     uint balance = address(this).balance;
-    //     if (balance == 0)
-    //     {
-    //         revert ZeroBalance();
-    //     }
-
-    //     (bool sent, ) = address(owner()).call{value: balance}("");
-    //     if (!sent)
-    //     {
-    //         revert FailedToSendEther();
-    //     }
-    //     //payable(owner()).transfer(balance);
-    // }
-
-    function userWithdrawMoney() external 
+    function userWithdrawMoney() external noReentrant 
     {
         uint balance = __userFunds[msg.sender];
-        // console.log("owner bal: ", __userFunds[owner()]);
-        // console.log("this bal: ", address(this).balance);
-        // console.log("msg.sender addr: ", address(msg.sender));
-        // console.log("msg.sender bal: ", balance);
         if (balance == 0)
         {
             revert ZeroBalance();
@@ -120,10 +109,5 @@ contract NFTMarket is Ownable
             revert FailedToSendEther();
         }
         delete __userFunds[msg.sender];
-        // console.log("post delete:");
-        // console.log("owner bal: ", __userFunds[owner()]);
-        // console.log("this bal: ", address(this).balance);
-        // console.log("msg.sender addr: ", address(msg.sender));
-        // console.log("msg.sender bal: ", __userFunds[msg.sender]);
     }
 }

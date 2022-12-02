@@ -2,9 +2,8 @@ import { expect } from "chai";
 import { BigNumber } from "ethers";
 import { ethers } from "hardhat";
 import { Contract } from "hardhat/internal/hardhat-network/stack-traces/model";
-//const BigNumber = require('bignumber.js');
 
-//TODO check event params
+
 describe ("NFTMarket", () => {
   let nftMarket: Contract;
   let nftItem: Contract;
@@ -85,7 +84,7 @@ describe ("NFTMarket", () => {
       const tokenID = await createNFT(tokenURI);
 
       const [addr1, addr2] = await ethers.getSigners();
-      const price = 12345;
+      const price = 123_456_789;
       await nftItem.approve(nftMarket.address, tokenID);
       await nftMarket.listNFT(tokenID, price, nftItem.address);
       await new Promise(r => setTimeout(r, 100));
@@ -123,10 +122,10 @@ describe ("NFTMarket", () => {
 
   describe("withdrawFunds", () => {
     const tokenURI = 'https://some.uri/';
-    // it("should revert if zero balance", async () => {
-    //   const [addr1, addr2] = await ethers.getSigners()
-    //   await expect(nftMarket.connect(addr2).userWithdrawMoney()).to.be.revertedWithCustomError(nftMarket, "ZeroBalance");
-    // })
+    it("should revert if zero balance", async () => {
+      const [addr1, addr2] = await ethers.getSigners()
+      await expect(nftMarket.connect(addr2).userWithdrawMoney()).to.be.revertedWithCustomError(nftMarket, "ZeroBalance");
+    })
 
     it("should withdraw only certain address' eth", async () => {
       const [addr1, addr2, addr3] = await ethers.getSigners()
@@ -134,62 +133,27 @@ describe ("NFTMarket", () => {
       await expect(nftMarket.connect(addr3).userWithdrawMoney()).to.be.revertedWithCustomError(nftMarket, "ZeroBalance")
       //Clear Contract
       await nftMarket.userWithdrawMoney();
-      //console.log("Beginning:\nAddr1: ", await addr1.getBalance(), "\nAddr2", await addr2.getBalance(), "\nAddr3", await addr3.getBalance());
       
       //List and Buy
       const transaction = await nftItem.connect(addr3).createNFT(tokenURI);
       const receipt = await transaction.wait();
       const tokenID = receipt.events[0].args.tokenId;
 
-      const price = 66666;
+      const price = 100_000_000;
       await nftItem.connect(addr3).approve(nftMarket.address, tokenID);
       await nftMarket.connect(addr3).listNFT(tokenID, price, nftItem.address);
       await new Promise(r => setTimeout(r, 100));
 
       await nftMarket.connect(addr2).buyNFT(tokenID, nftItem.address, {value: price})
-      
-      //console.log("Post Buy:\nAddr1: ", await addr1.getBalance(), "\nAddr2", await addr2.getBalance(), "\nAddr3", await addr3.getBalance());
-
       const oldBal = await addr3.getBalance();
       const withdrawTransact = await nftMarket.connect(addr3).userWithdrawMoney();
-      const withdrawReceipt = await transaction.wait();
-      const gas = receipt.gasUsed * receipt.effectiveGasPrice;
-      //const newBal = (await addr3.getBalance()).add(gas);
+      const withdrawReceipt = await withdrawTransact.wait();
+      const gas = withdrawReceipt.gasUsed * withdrawReceipt.effectiveGasPrice;
 
-      console.log("TESTTESTTESTTESTTESTTEST");
-      console.log(oldBal);
-      console.log(gas);
-      console.log(oldBal.sub(gas));
-      console.log(price);
-      console.log(await addr3.getBalance());
-      expect(oldBal.sub(gas).add(price)).to.eq(await addr3.getBalance());
-      //console.log(oldBal.sub(gas).add(price).eq(await addr3.getBalance()));
+
+      const winning = Math.floor((price * 98 / 100));
+      expect(oldBal.sub(gas).add(winning)).to.eq(await addr3.getBalance());
     })
-
-    // it("should transfer funds to deployer", async() => {
-    //   const contractBal = await nftMarket.provider.getBalance(nftMarket.address);
-    //   //returns 0 rn fix buy then this will work
-    //   console.log("BALBALBAL:", contractBal);
-
-    //   const [addr1, addr2] = await ethers.getSigners()
-    //   const initialOwnerBal = await addr1.getBalance();
-    //   const transaction = await nftMarket.userWithdrawMoney();
-    //   const receipt = await transaction.wait();
-
-      
-    //   await new Promise((r) => setTimeout(r, 100));
-    //   const gas = receipt.gasUsed * receipt.effectiveGasPrice;
-    //   const newBalance = await addr1.getBalance() + gas;
-    //   const transferred = newBalance - initialOwnerBal;
-    //   //expect(transferred).to.equal(contractBal);
-    // })
-
-    // it("should revert if contract has zero ether", async () => {
-    //   //const [addr1, addr2] = await ethers.getSigners();
-    //   await nftMarket.userWithdrawMoney();
-    //   //await nftMarket.userWithdrawMoney();
-    //   //await expect(nftMarket.userWithdrawMoney()).to.be.revertedWithCustomError(nftMarket, "ZeroBalance");
-    // })
   })
 })
 
