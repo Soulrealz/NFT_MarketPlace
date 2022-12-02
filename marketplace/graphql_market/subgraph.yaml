@@ -1,12 +1,12 @@
 specVersion: 0.0.5
 schema:
-  file: schema.graphql
+  file: ./schema.graphql
 dataSources:
   - kind: ethereum
     name: NFTItem
     network: goerli
     source:
-      address: "0xe69007aEc4EA8704C1Df0B0CDeC590b96eD5AbA1"
+      address: "0xBd23BDAC8327F3266f4Cf7966F4086568cb44D9e"
       abi: NFTItem
       startBlock: 8060419
     mapping:
@@ -17,16 +17,16 @@ dataSources:
         - CreatedNFT
       abis:
         - name: NFTItem
-          file: NFTItem\abis\NFTItem.json
+          file: ./abis/NFTItem.json
       eventHandlers:
         - event: CreatedNFT(uint256,address,string)
           handler: handleCreatedNFT
-      file: NFTItem\NFTItem.wasm
+      file: ./src/nft-item.ts
   - kind: ethereum
     name: NFTMarket
     network: goerli
     source:
-      address: "0xfD40cF93a43Fa1e7a6Fbd718c5158CBfBd00f733"
+      address: "0xf3897521864005E8a8Ab7c7Bf96EFbfEeBc7576a"
       abi: NFTMarket
       startBlock: 8060419
     mapping:
@@ -39,7 +39,7 @@ dataSources:
         - NFTListingCancelled
       abis:
         - name: NFTMarket
-          file: NFTMarket\abis\NFTMarket.json
+          file: ./abis/NFTMarket.json
       eventHandlers:
         - event: NFTBought(uint256,address,address)
           handler: handleNFTBought
@@ -47,4 +47,4 @@ dataSources:
           handler: handleNFTListed
         - event: NFTListingCancelled(uint256,address,address)
           handler: handleNFTListingCancelled
-      file: NFTMarket\NFTMarket.wasm
+      file: ./src/nft-market.ts
