@@ -1,0 +1,50 @@
+specVersion: 0.0.5
+schema:
+  file: schema.graphql
+dataSources:
+  - kind: ethereum
+    name: NFTItem
+    network: goerli
+    source:
+      address: "0xe69007aEc4EA8704C1Df0B0CDeC590b96eD5AbA1"
+      abi: NFTItem
+      startBlock: 8060419
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      entities:
+        - CreatedNFT
+      abis:
+        - name: NFTItem
+          file: NFTItem\abis\NFTItem.json
+      eventHandlers:
+        - event: CreatedNFT(uint256,address,string)
+          handler: handleCreatedNFT
+      file: NFTItem\NFTItem.wasm
+  - kind: ethereum
+    name: NFTMarket
+    network: goerli
+    source:
+      address: "0xfD40cF93a43Fa1e7a6Fbd718c5158CBfBd00f733"
+      abi: NFTMarket
+      startBlock: 8060419
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      entities:
+        - NFTBought
+        - NFTListed
+        - NFTListingCancelled
+      abis:
+        - name: NFTMarket
+          file: NFTMarket\abis\NFTMarket.json
+      eventHandlers:
+        - event: NFTBought(uint256,address,address)
+          handler: handleNFTBought
+        - event: NFTListed(uint256,uint256,address,address)
+          handler: handleNFTListed
+        - event: NFTListingCancelled(uint256,address,address)
+          handler: handleNFTListingCancelled
+      file: NFTMarket\NFTMarket.wasm

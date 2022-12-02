@@ -1,0 +1,24 @@
+type CreatedNFT @entity(immutable: true) {
+  id: ID! #tokenID
+  owner: Bytes! # address
+  tokenURI: String! # string
+}
+
+type NFTBought @entity(immutable: true) {
+  id: ID! #tokenID
+  from: Bytes! # address
+  newOwner: Bytes! # address
+}
+
+type NFTListed @entity(immutable: true) {
+  id: ID! # tokenID
+  price: BigInt! # uint256
+  from: Bytes! # address
+  to: Bytes! # address
+}
+
+type NFTListingCancelled @entity(immutable: true) {
+  id: ID! #tokenID
+  from: Bytes! # address
+  to: Bytes! # address
+}
