@@ -8,6 +8,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@apollo/client": "3.5.9",
     "@ethersproject/providers": "^5.7.2",
     "@headlessui/react": "^1.5.0",
     "@heroicons/react": "^1.0.5",
@@ -26,6 +27,7 @@
     "yup": "^0.32.11"
   },
   "devDependencies": {
+    "apollo": "2.33.9",
     "@nomicfoundation/hardhat-chai-matchers": "^1.0.4",
     "@nomiclabs/hardhat-ethers": "^2.0.3",
     "@types/mocha": "^9.0.0",
