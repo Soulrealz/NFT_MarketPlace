@@ -4,15 +4,17 @@ import { TransactionResponse } from "@ethersproject/abstract-provider";
 import NFT_MARKET from "../../../EthEnvironment/artifacts/contracts/Marketplace.sol/NFTMarket.json";
 import NFT_ITEM from "../../../EthEnvironment/artifacts/contracts/MarketItem.sol/NFTItem.json";
 import useSigner from "./signer";
+import useOwnedNFTs from "./useOwnedNFTs";
 
 const NFT_MARKET_ADDRESS = process.env.NEXT_PUBLIC_NFT_MARKET_ADDRESS as string;
 const NFT_ITEM_ADDRESS = process.env.NEXT_PUBLIC_NFT_ITEM_ADDRESS as string;
 
 const useNFTMarket = () => {
     const {signer} = useSigner();
-    //TODO: Fix addresses
     const nftMarket = new Contract(NFT_MARKET_ADDRESS, NFT_MARKET.abi, signer)
     const nftItem = new Contract(NFT_ITEM_ADDRESS, NFT_ITEM.abi, signer)
+
+    const ownedNFTs = useOwnedNFTs();
 
     const createNFT = async (values: CreationValues) => {
         try {
@@ -33,7 +35,7 @@ const useNFTMarket = () => {
         }
     }
 
-    return {createNFT};
+    return {createNFT, ...ownedNFTs};
 }
 
 export default useNFTMarket;
