@@ -1,5 +1,5 @@
 import classNames from "classnames";
-import { BigNumber } from "ethers";
+import { BigNumber, ethers, utils } from "ethers";
 import { useEffect, useState } from "react";
 import { NFT } from "../state/nft-market/interfaces";
 import { ipfsToHTTPS } from "../helpers";
@@ -22,7 +22,7 @@ type NFTCardProps = {
 const NFTCard = (props: NFTCardProps) => {
   const { nft, className } = props;
   const address = useSigner();
-  const { listNFT } = useNFTMarket();
+  const { listNFT, cancelListing } = useNFTMarket();
   const [meta, setMeta] = useState<NFTMetadata>();
   const [loading, setLoading] = useState(false);
   const [sellPopupOpen, setSellPopupOpen] = useState(false);
@@ -56,11 +56,19 @@ const NFTCard = (props: NFTCardProps) => {
   };
 
   const onBuyClicked = async () => {
-    // TODO: buy NFT
+    console.log(nft);
   };
 
   const onCancelClicked = async () => {
-    // TODO: cancel listing
+    setLoading(true);
+    try {
+      await cancelListing(nft.id);
+    }
+    catch (exception) {
+      console.log(exception);
+    }
+
+    setLoading(false);
   };
 
   const onSellConfirmed = async (price: BigNumber) => {
@@ -115,13 +123,13 @@ const NFTCard = (props: NFTCardProps) => {
             {!forSale && "SELL"}
             {forSale && owned && (
               <>
-                <span className="group-hover:hidden">{nft.price} ETH</span>
+                <span className="group-hover:hidden">{utils.formatEther(nft.price)} ETH</span>
                 <span className="hidden group-hover:inline">CANCEL</span>
               </>
             )}
             {forSale && !owned && (
               <>
-                <span className="group-hover:hidden">{nft.price} ETH</span>
+                <span className="group-hover:hidden">{utils.formatEther(nft.price)} ETH</span>
                 <span className="hidden group-hover:inline">BUY</span>
               </>
             )}

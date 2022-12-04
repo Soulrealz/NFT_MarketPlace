@@ -6,6 +6,7 @@ import NFT_ITEM from "../../../EthEnvironment/artifacts/contracts/MarketItem.sol
 import useSigner from "./signer";
 import useOwnedNFTs from "./useOwnedNFTs";
 
+
 const NFT_MARKET_ADDRESS = process.env.NEXT_PUBLIC_NFT_MARKET_ADDRESS as string;
 const NFT_ITEM_ADDRESS = process.env.NEXT_PUBLIC_NFT_ITEM_ADDRESS as string;
 
@@ -42,7 +43,12 @@ const useNFTMarket = () => {
         await transList.wait();
     }
 
-    return {createNFT, listNFT, ...ownedNFTs};
+    const cancelListing = async (tokenID: string) => {
+        const transList: TransactionResponse = await nftMarket.cancelListing(tokenID);
+        await transList.wait();
+    }
+
+    return {createNFT, listNFT, cancelListing, ...ownedNFTs};
 };
 
 export default useNFTMarket;
