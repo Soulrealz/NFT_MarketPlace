@@ -3,6 +3,7 @@ import useNFTMarket from "../../state/nft-market";
 
 const OwnedPage = () => {
   const {ownedNFTs} = useNFTMarket();
+  //console.log(ownedNFTs);
   
   return (
     <div className="flex w-full flex-col">

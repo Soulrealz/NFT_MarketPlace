@@ -5,6 +5,8 @@ import { NFT } from "../state/nft-market/interfaces";
 import { ipfsToHTTPS } from "../helpers";
 import AddressAvatar from "./AddressAvatar";
 import SellPopup from "./SellPopup";
+import useSigner from "../state/nft-market/signer";
+import useNFTMarket from "../state/nft-market";
 
 type NFTMetadata = {
   name: string;
@@ -19,7 +21,8 @@ type NFTCardProps = {
 
 const NFTCard = (props: NFTCardProps) => {
   const { nft, className } = props;
-  const address = "";
+  const address = useSigner();
+  const { listNFT } = useNFTMarket();
   const [meta, setMeta] = useState<NFTMetadata>();
   const [loading, setLoading] = useState(false);
   const [sellPopupOpen, setSellPopupOpen] = useState(false);
@@ -61,11 +64,20 @@ const NFTCard = (props: NFTCardProps) => {
   };
 
   const onSellConfirmed = async (price: BigNumber) => {
-    // TODO: list NFT
+    setSellPopupOpen(false);
+    setLoading(true);
+    try {
+      await listNFT(nft.id, price);
+    }
+    catch (exception) {
+      console.log(exception);
+    }
+
+    setLoading(false);
   };
 
   const forSale = nft.price != "0";
-  const owned = nft.owner == address?.toLowerCase();
+  const owned = nft.owner == address?.address.toLowerCase();
 
   return (
     <div

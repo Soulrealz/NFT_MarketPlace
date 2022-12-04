@@ -35,7 +35,14 @@ const useNFTMarket = () => {
         }
     }
 
-    return {createNFT, ...ownedNFTs};
-}
+    const listNFT = async (tokenID: string, price: BigNumber) => {
+        const transApprove = await nftItem.approve(nftMarket.address, tokenID);
+        await transApprove.wait();
+        const transList: TransactionResponse = await nftMarket.listNFT(tokenID, price, nftItem.address);
+        await transList.wait();
+    }
+
+    return {createNFT, listNFT, ...ownedNFTs};
+};
 
 export default useNFTMarket;
