@@ -38,8 +38,10 @@ const useNFTMarket = () => {
     }
 
     const listNFT = async (tokenID: string, price: BigNumber) => {
+        console.log("here");
         const transApprove = await nftItem.approve(nftMarket.address, tokenID);
         await transApprove.wait();
+        console.log("here");
         const transList: TransactionResponse = await nftMarket.listNFT(tokenID, price, nftItem.address);
         await transList.wait();
     }
@@ -56,7 +58,18 @@ const useNFTMarket = () => {
         await transBuy.wait();
     }
 
-    return {createNFT, listNFT, cancelListing, buyNFT, ...ownedNFTs};
+    const withdrawMoney = async () => {
+        //TODO: FIX FRONTEND
+        try {
+            const transWithdraw: TransactionResponse = await nftMarket.userWithdrawMoney();
+            await transWithdraw.wait();
+        }
+        catch (exception) {
+            console.log(exception);
+        }
+    }
+
+    return {createNFT, listNFT, cancelListing, buyNFT, withdrawMoney, ...ownedNFTs};
 };
 
 export default useNFTMarket;

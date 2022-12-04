@@ -9,6 +9,7 @@ const NavBar = () => {
       <NavBarItem href="/">Home</NavBarItem>
       <NavBarItem href="/owned">Owned</NavBarItem>
       <NavBarItem href="/create">Create</NavBarItem>
+      <NavBarItem href="/withdraw">Withdraw</NavBarItem>
     </nav>
   );
 };
