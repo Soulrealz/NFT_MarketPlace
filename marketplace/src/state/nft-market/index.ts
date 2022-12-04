@@ -5,6 +5,7 @@ import NFT_MARKET from "../../../EthEnvironment/artifacts/contracts/Marketplace.
 import NFT_ITEM from "../../../EthEnvironment/artifacts/contracts/MarketItem.sol/NFTItem.json";
 import useSigner from "./signer";
 import useOwnedNFTs from "./useOwnedNFTs";
+import { NFT } from "./interfaces";
 
 
 const NFT_MARKET_ADDRESS = process.env.NEXT_PUBLIC_NFT_MARKET_ADDRESS as string;
@@ -48,7 +49,14 @@ const useNFTMarket = () => {
         await transList.wait();
     }
 
-    return {createNFT, listNFT, cancelListing, ...ownedNFTs};
+    const buyNFT = async (nft: NFT) => {
+        const transBuy: TransactionResponse = await nftMarket.buyNFT(nft.id, nftItem.address, {
+            value: nft.price
+        });
+        await transBuy.wait();
+    }
+
+    return {createNFT, listNFT, cancelListing, buyNFT, ...ownedNFTs};
 };
 
 export default useNFTMarket;

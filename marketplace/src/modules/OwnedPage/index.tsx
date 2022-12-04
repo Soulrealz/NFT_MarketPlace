@@ -1,7 +1,6 @@
 import NFTCard from "../../components/NFTCard";
 import useNFTMarket from "../../state/nft-market";
-import { listedNFTsWithURI } from "../../state/nft-market/listedNFTsWithURI";
-//import useNFTsOwnedByMarket from "./useNFTsOwnedByMarket";
+import { listedNFTsWithURI } from "../../state/nft-market/nftUtilityFunctions";
 
 const OwnedPage = () => {
   const {ownedNFTs} = useNFTMarket();

@@ -22,6 +22,7 @@ export const SignerProvider = ({children}: {children: ReactNode}) => {
         if (web3modal.cachedProvider) {
             connectWallet();
         }
+        window.ethereum.on("accountsChanged", connectWallet);
     }, [])
     
 
