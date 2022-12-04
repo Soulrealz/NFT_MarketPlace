@@ -1,0 +1,10 @@
+{
+  "goerli": {
+    "NFTItem": {
+      "address": "0xBd23BDAC8327F3266f4Cf7966F4086568cb44D9e"
+    },
+    "NFTMarket": {
+      "address": "0xf3897521864005E8a8Ab7c7Bf96EFbfEeBc7576a"
+    }
+  }
+}

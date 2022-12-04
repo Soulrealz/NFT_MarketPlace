@@ -1,0 +1,27 @@
+{
+  "name": "graphql_market",
+  "license": "UNLICENSED",
+  "scripts": {
+    "codegen": "graph codegen",
+    "build": "graph build",
+    "deploy": "graph deploy --node https://api.studio.thegraph.com/deploy/ graphql_market",
+    "create-local": "graph create --node http://localhost:8020/ graphql_market",
+    "remove-local": "graph remove --node http://localhost:8020/ graphql_market",
+    "deploy-local": "graph deploy --node http://localhost:8020/ --ipfs http://localhost:5001 graphql_market",
+    "test": "graph test",
+    "preinstall": "npx npm-force-resolutions"
+  },
+  "resolutions": {
+    "graphql": "15.5.0",
+    "**/graphql": "15.5.0"
+  },
+  "dependencies": {
+    "@apollo/client": "3.5.9",
+    "@graphprotocol/graph-cli": "0.36.1",
+    "@graphprotocol/graph-ts": "0.28.1"
+  },
+  "devDependencies": {
+    "matchstick-as": "0.5.0",
+    "apollo": "2.33.9"
+  } 
+}

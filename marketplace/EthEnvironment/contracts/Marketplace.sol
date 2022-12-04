@@ -4,60 +4,72 @@ pragma solidity 0.8.17;
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "./MarketItem.sol";
 
-import "../../node_modules/hardhat/console.sol";
-struct NFTListing 
-{
-    uint256 price;
-    address seller;
-    NFTItem item;
-}
-
 contract NFTMarket is Ownable
 {   
+    struct NFTListing 
+    {
+        uint256 price;
+        address seller;
+        NFTItem item;
+        bool isForSale;
+    }
+
+    bool internal locked;
     mapping(uint256 => NFTListing) private __listings;
+    mapping(address => uint) private __userFunds;
 
     error InvalidPrice();
+    error InsufficientFunds();
     error NFTNotListedForSale();
     error NotTheOwner();
     error ZeroBalance();
+    error FailedToSendEther();
+    error NoReEntry();
 
     event NFTListed(uint tokenID, uint price, address from, address to);
     event NFTBought(uint tokenID, address from, address newOwner);
-    event NFTListingCancelled(address from, address to);
+    event NFTListingCancelled(uint tokenID, address from, address to);
+
+    modifier noReentrant() {
+        if (locked)
+        {
+            revert NoReEntry();
+        }
+        locked = true;
+        _;
+        locked = false;
+    }
 
     constructor() {}
 
     function listNFT(uint tokenID, uint price, NFTItem item) external 
     {
-        if (price <= 0)
+        if (price == 0)
         {
             revert InvalidPrice();
         }
         item.transferFrom(msg.sender, address(this), tokenID);
-        __listings[tokenID] = NFTListing(price, msg.sender, item);
+        __listings[tokenID] = NFTListing(price, msg.sender, item, true);
         emit NFTListed(tokenID, price, msg.sender, address(this));
     }
 
     function buyNFT(uint tokenID, NFTItem item) external payable
     {
         NFTListing memory listing = __listings[tokenID];
-        if (listing.price == 0) 
+        if (!listing.isForSale) 
         {
             revert NFTNotListedForSale();
         }
         if (listing.price != msg.value)
         {
-            revert InvalidPrice();
+            revert InsufficientFunds();
         }
         item.transferFrom(address(this), msg.sender, tokenID);
-        payable(listing.seller).transfer(listing.price * 98 / 100);
-        console.log("value - ", msg.value);
-        console.log("transfer - ", listing.price * 98 / 100);
-        console.log("balance - ", address(this).balance);
+        __userFunds[listing.seller] += listing.price * 98 / 100;
+        __userFunds[owner()] += (listing.price - (listing.price * 98 / 100));
         removeNFTFromListing(tokenID);
         
         emit NFTBought(tokenID, address(this), msg.sender);
-        console.log("555");
     }
 
     function cancelListing(uint tokenID) external
@@ -75,23 +87,27 @@ contract NFTMarket is Ownable
         listing.item.transferFrom(address(this), msg.sender, tokenID);
         removeNFTFromListing(tokenID);
 
-        emit NFTListingCancelled(address(this), msg.sender);
+        emit NFTListingCancelled(tokenID, address(this), msg.sender);
     }
 
     function removeNFTFromListing(uint tokenID) private 
     {
-        __listings[tokenID].price = 0;
-        __listings[tokenID].seller = address(0);
+        delete __listings[tokenID];
     }
 
-    function withdrawFunds() external onlyOwner
+    function userWithdrawMoney() external noReentrant 
     {
-        uint balance = address(this).balance;
+        uint balance = __userFunds[msg.sender];
         if (balance == 0)
         {
             revert ZeroBalance();
         }
 
-        payable(owner()).transfer(balance);
+        (bool sent, ) = msg.sender.call{value: balance}("");
+        if (!sent)
+        {
+            revert FailedToSendEther();
+        }
+        delete __userFunds[msg.sender];
     }
 }
